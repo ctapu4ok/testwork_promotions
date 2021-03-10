@@ -52,14 +52,18 @@ class StatisticsController extends Controller
     public function actionAdd_statistics($count, $promotion_id, $user_id)
     {
         if (!Yii::$app->user->isGuest) {
+            $progressRows = [];
             while ($count != 0) {
-                $ProgressModel = new ProgressUserPromotions();
-                $ProgressModel->promotion_id = $promotion_id;
-                $ProgressModel->user_id = $user_id;
-                $ProgressModel->status = rand(0, 1);
-                $ProgressModel->save();
+                $progressRows[] = [
+                    'promotion_id' => $promotion_id,
+                    'user_id' => $user_id,
+                    'status' => rand(0,1),
+                    'date' => (new DateTime('now'))->format('Y-m-d H:i:s')
+                ];
                 $count--;
             }
+
+            Yii::$app->db->createCommand()->batchInsert(ProgressUserPromotions::tableName(), ['promotion_id', 'user_id','status','date'], $progressRows)->execute();
         }
         return $this->redirect('/statistics');
     }
